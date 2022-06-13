@@ -1,0 +1,14 @@
+{
+    "Lua.diagnostics.globals": [
+        "push",
+        "love",
+        "class_commons",
+        "smallFont",
+        "largeFont",
+        "sounds",
+        "scoreFont"
+    ],
+    "Lua.diagnostics.disable": [
+        "lowercase-global"
+    ]
+}

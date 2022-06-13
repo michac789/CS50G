@@ -27,7 +27,7 @@ versatile print function that can align text left, right, or center on the scree
 > love.window.setMode(width, height, params):
 used to initialize the window's dimensions and to set parameters like vertical sync, etc
 L23: declare window width and height, L29: function love.load()
-*curly braces are used to represent table (similar to dict in python)
+*curly braces are used to represent table (similar to dict in python / objects in js / hash tables)
 
 - Pong 1 (The Low-Resolution Update)
 > love.graphics.setDefaultFilter(min, max): 
