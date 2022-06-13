@@ -1,0 +1,97 @@
+GD50 Week 0 - Pong
+
+- Topics
+Lua, Love2D, Drawing Shapes, Drawing Text, DeltaTime and Velocity, Game State, Basic OOP, Box Collision, Sound Effects
+Installing Love2D: https://love2d.org/#download
+Reference: https://love2d.org/wiki/Getting_Started
+Demo code repo: https://github.com/games50/pong
+> Lua:
+Flexible, lighweight scripting language, intended for embedded use in larger applications, similar to Javascript
+> Love2D:
+Fast2D game development framework written in C++, uses Lua and contains modules for graphics, keyboard input, math,
+audio, windowing, portable and great for prototypinh
+
+- Game Basics
+> Game loop:
+Process input -> update game -> render -> repeat ALL until some victory or defeat condition
+> 2D coordinate system:
+Start with (0, 0) on the corner top left, with (width, height) on the corner bottom right
+
+- Pong 0 (Initializing Screen)
+> love.load(): used for initializing our game state at the very beginning of program execution
+> love.update(dt): called each frame by Love, will be the elapsed time in seconds since last frame;
+used to scale any changes in our game for even behaviours across frame rates
+> love.draw(): called each frame by Love after update for drawing things to the screen once they've changed
+> love.graphics.printf(text, x, y, [width], [align]):
+versatile print function that can align text left, right, or center on the screen
+> love.window.setMode(width, height, params):
+used to initialize the window's dimensions and to set parameters like vertical sync, etc
+L23: declare window width and height, L29: function love.load()
+*curly braces are used to represent table (similar to dict in python)
+
+- Pong 1 (The Low-Resolution Update)
+> love.graphics.setDefaultFilter(min, max): 
+sets the texture scaling filter when minimizing and magnifying textures and fonts; 
+result in perfect pixel upscaling and downscaling, simulating a retro level
+> love.keypressed(key):
+callback function that executes whenever we press a key
+> love.event.quit():
+quit the application
+> using library: require '<lib_name>'
+
+- Pong 2 (The Rectangle Update)
+> love.graphics.newFont(path, size): 
+loads a font into memory at a specific path, setting it to a specific size, storing in an object
+> love.graphics.setFont(font):
+sets Love2D currently active font to a passed-in font object that we can create using love.graphics.newFont
+
+- Pong 3 (Important Functions)
+> love.keyboard.isDown(key)
+> Paddle speed: multiplied by dt to ensure move the same function regardless of fps
+> Updates: 
+creating paddle movements; added score font
+
+- Pong 4 (The Ball Update)
+> math.randomseed(num):
+generate random number with some value such that its randomness is dependent on that supplied value
+> os.time():
+returns, in seconds, the time since 00:00:00 UTC, Jan 1, 1970 (unix epoch time)
+> math.random(min, max): returns a number between min and max inclusive
+> math.min(num1, num2): returns the lesser of the 2 values
+> math.max(num1, num2): returns the biggest of the 2 values
+> Updates:
+added initial state and play state, paddle could not move beyond the screen, update ball speed
+
+- Pong 5 (Class Update)
+Class makes an object has several attributes and function correlated to that object
+OOP usually capitalize first letter to differentiate objects (just a good practice)
+> main l35: Class = require 'class', create 2 classes: Ball & Paddle
+> Ball class:
+Ball = Class{} -- initialize class
+init function: function Ball:init(arg), Ball:reset(), etc
+
+- Pong 6 (FPS Update)
+> love.window.setTitle(title): sets the title of our application window
+> love.timer.getFPS(): returns the current FPS of our application, for easy monitoring
+> .. uses to concatenate strings (also with other data types) in Lua
+
+- Pong 7 (Collision Update)
+> AABB (alix-aligned bounding boxes)
+
+- Pong 8 (Score Update)
+> Keep track of the score of 2 players, checking to increment the score
+
+- Pong 9 (Serve Update)
+> State Machine (3 States: start, serve, play)
+
+- Pong 10 (Victory Update)
+> Add victory check and 'done' game state
+
+- Pong 11 (Audiio Update)
+> love.audio.newSource(path, [type]): create audio object
+> bxfr (download)
+> static vs stream audio deployment (in this case static, stream for dynamic loading)
+> table creation (dict like structure)
+> play function gained from newSource object
+
+- Pong 12 (Resize Update)
