@@ -226,7 +226,7 @@ function love.draw()
 
     -- clear the screen with a specific color; in this case, a color similar
     -- to some versions of the original Pong
-    love.graphics.clear(40, 45, 52, 255)
+    love.graphics.clear(40/255, 45/255, 52/255, 1)
 
     love.graphics.setFont(smallFont)
 
@@ -271,7 +271,7 @@ function displayScore()
     -- draw score on the left and right center of the screen
     -- need to switch font to draw before actually printing
     love.graphics.setFont(scoreFont)
-    love.graphics.print(tostring(player1Score), VIRTUAL_WIDTH / 2 - 50, 
+    love.graphics.print(tostring(player1Score), VIRTUAL_WIDTH / 2 - 50,
         VIRTUAL_HEIGHT / 3)
     love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30,
         VIRTUAL_HEIGHT / 3)
