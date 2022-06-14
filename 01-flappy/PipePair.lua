@@ -24,9 +24,10 @@ function PipePair:init(y)
     self.y = y
 
     -- instantiate two pipes that belong to this pair
+    self.gap_height = math.random(80, 150)
     self.pipes = {
         ['upper'] = Pipe('top', self.y),
-        ['lower'] = Pipe('bottom', self.y + PIPE_HEIGHT + GAP_HEIGHT)
+        ['lower'] = Pipe('bottom', self.y + PIPE_HEIGHT + self.gap_height)
     }
 
     -- whether this pipe pair is ready to be removed from the scene
