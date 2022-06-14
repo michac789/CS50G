@@ -24,6 +24,7 @@ function PlayState:init()
     self.score = 0
     self.pipespawninterval = 1
     self.pause = false
+    self.pauseicon = love.graphics.newImage('assets/pauseicon.png')
 
     -- initialize our last recorded Y value for a gap placement to base other gaps off of
     self.lastY = -PIPE_HEIGHT + math.random(80) + 20
@@ -32,6 +33,16 @@ end
 function PlayState:update(dt)
     if love.keyboard.wasPressed('p') then
         self.pause = not self.pause
+        if self.pause then
+            sounds['pause']:play()
+            sounds['music']:pause()
+            BACKGROUND_SCROLL_SPEED = 0
+            GROUND_SCROLL_SPEED = 0
+        else
+            BACKGROUND_SCROLL_SPEED = 30
+            GROUND_SCROLL_SPEED = 60
+            sounds['music']:play()
+        end
     end
 
     if not self.pause then
@@ -123,6 +134,13 @@ function PlayState:render()
     love.graphics.print('Score: ' .. tostring(self.score), 8, 8)
 
     self.bird:render()
+    if self.pause then
+        love.graphics.setColor(1, 1, 1, 0.7)
+        love.graphics.draw(self.pauseicon,
+        VIRTUAL_WIDTH / 2 - self.pauseicon:getWidth() / 2,
+        VIRTUAL_HEIGHT / 2 - self.pauseicon:getHeight() / 2,
+        0, 1, 1)
+    end
 end
 
 --[[
