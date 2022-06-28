@@ -126,6 +126,7 @@ function GenerateQuadsBalls(atlas)
     return quads
 end
 
+-- returns generated quads for all power ups (total of 10)
 function GenerateQuadsPowerUp(atlas)
     local x = 0
     local y = 192
@@ -140,4 +141,9 @@ function GenerateQuadsPowerUp(atlas)
     end
 
     return quads
+end
+
+-- return locked brick graphic
+function GenerateLockedBrick(atlas)
+    return love.graphics.newQuad(160, 48, 32, 16, atlas:getDimensions())
 end

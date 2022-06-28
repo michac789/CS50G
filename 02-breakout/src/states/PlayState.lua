@@ -40,6 +40,7 @@ function PlayState:enter(params)
 end
 
 function PlayState:update(dt)
+    -- pausing feature
     if self.paused then
         if love.keyboard.wasPressed('space') then
             self.paused = false
@@ -53,15 +54,14 @@ function PlayState:update(dt)
         return
     end
 
-    -- update positions based on velocity
+    -- update positions of paddle, ball, powerup and key
     self.paddle:update(dt)
-
     for _, ball in pairs(self.balls) do
         ball:update(dt)
     end
-    
     self.powerup:update(dt)
 
+    -- handle collision of all balls
     for _, ball in pairs(self.balls) do
         if ball:collides(self.paddle) then
             -- raise ball above paddle in case it goes below it, then reverse dy
@@ -81,7 +81,6 @@ function PlayState:update(dt)
         end
     end
 
-
     -- activate powerup when colliding with paddle
     if self.powerup:collide(self.paddle) then
         self.powerup:reset()
@@ -96,21 +95,26 @@ function PlayState:update(dt)
             newball.skin = math.random(7)
             table.insert(self.balls, newball)
         end
-
     end
 
-    -- detect collision across all bricks with the ball
+    -- detect collision across all bricks with all balls
     for _, brick in pairs(self.bricks) do
-
         for _, ball in pairs(self.balls) do
             -- only check collision if we're in play
             if brick.inPlay and ball:collides(brick) then
 
-                -- add to score
-                self.score = self.score + (brick.tier * 200 + brick.color * 25)
-
                 -- trigger the brick's hit function, which removes it from play
                 brick:hit()
+
+                if brick.locked == true then
+                    -- locked bring worth 1000 points only when they are destroyed, otherwise no points awarded
+                    if brick.inPlay == false then
+                        self.score = self.score + 1000
+                    end
+                else
+                    -- add to score (regular bricks)
+                    self.score = self.score + (brick.tier * 200 + brick.color * 25)
+                end
 
                 --[[
                     add probability (20%) to spawn powerup everytime any ball hits any brick,
@@ -205,11 +209,12 @@ function PlayState:update(dt)
         end
     end
 
-    -- add paddle length every 1000 score
-    if self.score >= math.ceil((self.scoretracker + 1) / 1000) * 1000 then
+    -- add paddle length every multiples of 3000 score
+    if self.score >= math.ceil((self.scoretracker + 1) / 3000) * 3000 then
         if self.paddle.size < 4 then
             self.paddle.size = self.paddle.size + 1
             self.paddle.width = self.paddle.width + 32
+            gSounds['longerpaddle']:play()
         end
         self.scoretracker = self.score
     end
@@ -233,7 +238,7 @@ function PlayState:update(dt)
                 else
                     -- reset powerup
                     self.powerup:reset()
-                    
+
                     -- shrink the paddle when player loses a heart
                     local newpaddle = self.paddle
                     if newpaddle.size > 1 then
@@ -309,10 +314,10 @@ function PlayState:render()
 end
 
 function PlayState:checkVictory()
-    for k, brick in pairs(self.bricks) do
+    for _, brick in pairs(self.bricks) do
         if brick.inPlay then
             return false
-        end 
+        end
     end
 
     return true
