@@ -6,9 +6,16 @@
         "smallFont",
         "largeFont",
         "sounds",
-        "scoreFont"
+        "scoreFont",
+        "self"
     ],
     "Lua.diagnostics.disable": [
-        "lowercase-global"
-    ]
+        "lowercase-global",
+        "missing-parameter"
+    ],
+    "Lua.runtime.version": "LuaJIT",
+    "Lua.workspace.library": [
+        "${3rd}/love2d/library"
+    ],
+    "Lua.workspace.checkThirdParty": false,
 }

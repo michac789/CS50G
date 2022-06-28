@@ -89,7 +89,7 @@ function PlayState:update(dt)
         self.powerup:reset()
         gSounds['powerup']:play()
 
-        for _ = 0, 1 do
+        for _ = 0, 50 do
             local newball = Ball()
             newball.x = self.paddle.x + (self.paddle.width / 2) - 4
             newball.y = self.paddle.y - 8
@@ -135,7 +135,7 @@ function PlayState:update(dt)
                     given that this particular powerup does not exist (visible) yet on screen
                 ]]
                 if self.powerup.visible == false then
-                    if math.random(1, 5) == 1 then
+                    if math.random(1, 2) == 1 then
                         self.powerup:spawn(brick.x + 8, brick.y)
                     end
                 end

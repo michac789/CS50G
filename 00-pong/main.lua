@@ -91,7 +91,7 @@ function love.load()
     -- initialize our player paddles; make them global so that they can be
     -- detected by other functions and modules
     player1 = Paddle(10, 30, 5, 20)
-    player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
+    player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 50)
 
     -- place a ball in the middle of the screen
     ball = Ball(VIRTUAL_WIDTH / 2 - 2, VIRTUAL_HEIGHT / 2 - 2, 4, 4)
@@ -229,16 +229,55 @@ function love.update(dt)
         end
     end
 
-    --
-    -- paddles can move no matter what state we're in
-    --
-    -- player 1
-    if love.keyboard.isDown('w') then
-        player1.dy = -PADDLE_SPEED
-    elseif love.keyboard.isDown('s') then
-        player1.dy = PADDLE_SPEED
-    else
-        player1.dy = 0
+    -- player 1 AI that sometimes does mistake too
+    reflect = 12
+    accuracy = 5
+    if player1Score - player2Score < 0 then
+        reflect = 5
+        accuracy = 2
+    elseif player1Score - player2Score < 2 then
+        reflect = 2
+        accuracy = 0
+    end
+    if curr_x == nil or ball.dx > 0 then curr_x = 1000 end
+    if curr_x2 == nil or ball.dx < 0 then curr_x2 = 0 end
+    if ball.dx < 0 and ball.x < 350 and gameState == 'play' then
+        if curr_x - ball.x > 10 then
+            curr_x = ball.x
+            if math.random(2) == 1 then
+                if player1.y + 8 > ball.y then
+                    player1.dy = -PADDLE_SPEED
+                elseif player1.y + 18 < ball.y then
+                    player1.dy = PADDLE_SPEED
+                else
+                    player1.dy = 0
+                end
+            end
+        end
+    elseif ball.dx < 0 and ball.x < 120 and gameState == 'play' then
+        if curr_x - ball.x > reflect then
+            curr_x = ball.x
+            if math.random(2) == 1 then
+                if player1.y + 12 - accuracy > ball.y then
+                    player1.dy = -PADDLE_SPEED
+                elseif player1.y + 14 + accuracy < ball.y then
+                    player1.dy = PADDLE_SPEED
+                else
+                    player1.dy = 0
+                end
+            end
+        end
+    elseif ball.dx > 0 and gameState == 'play' then
+        if curr_x2 - ball.x < -25 then
+            curr_x2 = ball.x
+            if math.random(2) == 1 then
+                player1.dy = 0
+            elseif math.random(2) == 2 then
+                player1.dy = PADDLE_SPEED
+            else
+                player1.dy = -PADDLE_SPEED
+            end
+        end
     end
 
     -- player 2
