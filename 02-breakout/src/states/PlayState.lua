@@ -25,12 +25,12 @@ function PlayState:enter(params)
     self.bricks = params.bricks
     self.health = params.health
     self.score = params.score
+    self.scoretracker = self.score
     self.highScores = params.highScores
     self.balls = {params.ball}
     self.level = params.level
     self.powerup = params.powerup
-
-    self.recoverPoints = 5000
+    self.recoverPoints = params.recoverPoints
 
     -- give ball random starting velocity
     for _, ball in pairs(self.balls) do
@@ -205,6 +205,15 @@ function PlayState:update(dt)
         end
     end
 
+    -- add paddle length every 1000 score
+    if self.score >= math.ceil((self.scoretracker + 1) / 1000) * 1000 then
+        if self.paddle.size < 4 then
+            self.paddle.size = self.paddle.size + 1
+            self.paddle.width = self.paddle.width + 32
+        end
+        self.scoretracker = self.score
+    end
+
     -- if ball goes below bounds, revert to serve state and decrease health
     -- only if the ball is the last one!
     local count = 0
@@ -222,9 +231,18 @@ function PlayState:update(dt)
                         highScores = self.highScores
                     })
                 else
+                    -- reset powerup
                     self.powerup:reset()
+                    
+                    -- shrink the paddle when player loses a heart
+                    local newpaddle = self.paddle
+                    if newpaddle.size > 1 then
+                        newpaddle.size = newpaddle.size - 1
+                        newpaddle.width = newpaddle.width - 32
+                    end
+
                     gStateMachine:change('serve', {
-                        paddle = self.paddle,
+                        paddle = newpaddle,
                         bricks = self.bricks,
                         health = self.health,
                         score = self.score,
