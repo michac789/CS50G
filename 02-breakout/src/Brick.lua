@@ -80,7 +80,7 @@ function Brick:init(x, y)
     self.psystem:setParticleLifetime(0.5, 1)
 
     -- give it an acceleration of anywhere between X1,Y1 and X2,Y2 (0, 0) and (80, 80) here
-    -- gives generally downward 
+    -- gives generally downward
     self.psystem:setLinearAcceleration(-15, 0, 15, 80)
 
     -- spread of particles; normal looks more natural than uniform

@@ -16,7 +16,7 @@ function Powerup:spawn(x, y)
     self.visible = true
     self.x = x
     self.y = y
-    self.dy = 50
+    self.dy = math.random(30, 80)
 end
 
 -- called when a powerup is collected / uncollected to reset position

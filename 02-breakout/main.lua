@@ -310,5 +310,5 @@ end
 
 -- renders key on screen when obtained
 function renderKey()
-    love.graphics.printf('KEY', 0, 10, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf('KEY', VIRTUAL_WIDTH - 120, 5, VIRTUAL_WIDTH)
 end

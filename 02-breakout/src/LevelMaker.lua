@@ -62,7 +62,7 @@ function LevelMaker.createMap(level)
         local alternateTier2 = math.random(0, highestTier)
 
         -- choose whether there is locked brick or notice
-        local lockedbrick = math.random(1, 2) == 1 and true or false
+        local lockedbrick = math.random(1, 4) == 1 and true or false
 
         -- used only when we want to skip a block, for skip pattern
         local skipFlag = math.random(2) == 1 and true or false
