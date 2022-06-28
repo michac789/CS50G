@@ -28,6 +28,9 @@ function PlayState:enter(params)
     self.highScores = params.highScores
     self.ball = params.ball
     self.level = params.level
+    self.powerup = params.powerup
+    self.ball2 = params.ball
+    self.ball3 = params.ball
 
     self.recoverPoints = 5000
 
@@ -53,6 +56,7 @@ function PlayState:update(dt)
     -- update positions based on velocity
     self.paddle:update(dt)
     self.ball:update(dt)
+    self.powerup:update(dt)
 
     if self.ball:collides(self.paddle) then
         -- raise ball above paddle in case it goes below it, then reverse dy
@@ -75,6 +79,13 @@ function PlayState:update(dt)
         gSounds['paddle-hit']:play()
     end
 
+    -- activate powerup when colliding with paddle
+    if self.powerup:collide(self.paddle) then
+        self.powerup:reset()
+        gSounds['powerup']:play()
+        -- TODO
+    end
+
     -- detect collision across all bricks with the ball
     for k, brick in pairs(self.bricks) do
 
@@ -86,6 +97,16 @@ function PlayState:update(dt)
 
             -- trigger the brick's hit function, which removes it from play
             brick:hit()
+
+            --[[
+                add probability to spawn powerup everytime the ball hits any brick,
+                given that this particular powerup does not exist (visible) yet on screen
+            ]]
+            if self.powerup.visible == false then
+                if math.random(1, 2) == 1 then
+                    self.powerup:spawn(brick.x + 8, brick.y)
+                end
+            end
 
             -- if we have enough points, recover a point of health
             if self.score > self.recoverPoints then
@@ -187,6 +208,11 @@ function PlayState:update(dt)
         end
     end
 
+    -- if powerup goes below bounds, reset it
+    if self.powerup.y > VIRTUAL_HEIGHT then
+        self.powerup:reset()
+    end
+
     -- for rendering particle systems
     for k, brick in pairs(self.bricks) do
         brick:update(dt)
@@ -210,6 +236,8 @@ function PlayState:render()
 
     self.paddle:render()
     self.ball:render()
+
+    self.powerup:render()
 
     renderScore(self.score)
     renderHealth(self.health)
