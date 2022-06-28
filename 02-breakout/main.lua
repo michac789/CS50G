@@ -307,3 +307,8 @@ function renderScore(score)
     love.graphics.print('Score:', VIRTUAL_WIDTH - 60, 5)
     love.graphics.printf(tostring(score), VIRTUAL_WIDTH - 50, 5, 40, 'right')
 end
+
+-- renders key on screen when obtained
+function renderKey()
+    love.graphics.printf('KEY', 0, 10, VIRTUAL_WIDTH, 'center')
+end

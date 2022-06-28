@@ -31,6 +31,8 @@ function PlayState:enter(params)
     self.level = params.level
     self.powerup = params.powerup
     self.recoverPoints = params.recoverPoints
+    self.powerkey = Powerup(10)
+    self.haskey = false
 
     -- give ball random starting velocity
     for _, ball in pairs(self.balls) do
@@ -60,6 +62,7 @@ function PlayState:update(dt)
         ball:update(dt)
     end
     self.powerup:update(dt)
+    self.powerkey:update(dt)
 
     -- handle collision of all balls
     for _, ball in pairs(self.balls) do
@@ -81,7 +84,7 @@ function PlayState:update(dt)
         end
     end
 
-    -- activate powerup when colliding with paddle
+    -- activate multiball powerup when colliding with paddle
     if self.powerup:collide(self.paddle) then
         self.powerup:reset()
         gSounds['powerup']:play()
@@ -97,6 +100,13 @@ function PlayState:update(dt)
         end
     end
 
+    -- activate key powerup when colliding with paddle
+    if self.powerkey:collide(self.paddle) then
+        self.powerkey:reset()
+        gSounds['powerup']:play()
+        self.haskey = true
+    end
+
     -- detect collision across all bricks with all balls
     for _, brick in pairs(self.bricks) do
         for _, ball in pairs(self.balls) do
@@ -104,9 +114,13 @@ function PlayState:update(dt)
             if brick.inPlay and ball:collides(brick) then
 
                 -- trigger the brick's hit function, which removes it from play
-                brick:hit()
+                    brick:hit()
 
                 if brick.locked == true then
+                    if self.haskey == true then
+                        brick:hit(true)
+                        self.haskey = false
+                    end
                     -- locked bring worth 1000 points only when they are destroyed, otherwise no points awarded
                     if brick.inPlay == false then
                         self.score = self.score + 1000
@@ -117,12 +131,24 @@ function PlayState:update(dt)
                 end
 
                 --[[
-                    add probability (20%) to spawn powerup everytime any ball hits any brick,
+                    add probability (20%) to spawn multi ball powerup everytime any ball hits any brick,
                     given that this particular powerup does not exist (visible) yet on screen
                 ]]
                 if self.powerup.visible == false then
                     if math.random(1, 5) == 1 then
                         self.powerup:spawn(brick.x + 8, brick.y)
+                    end
+                end
+
+                --[[
+                    key powerup to open the bricked wall, one key only for one single bricked wall;
+                    key powerup cannot be spawn when you have it (but not used yet) or existing key powerup
+                    has not been collected;
+                    key powerup does not carry forward when you lose a heart or go to next level
+                ]]
+                if self.powerkey.visible == false and self.haskey == false then
+                    if math.random(1, 5) == 1 then
+                        self.powerkey:spawn(brick.x + 8, brick.y)
                     end
                 end
 
@@ -273,9 +299,13 @@ function PlayState:update(dt)
         gSounds['powerupdrop']:play()
         self.powerup:reset()
     end
+    if self.powerkey.y > VIRTUAL_HEIGHT then
+        gSounds['powerupdrop']:play()
+        self.powerkey:reset()
+    end
 
     -- for rendering particle systems
-    for k, brick in pairs(self.bricks) do
+    for _, brick in pairs(self.bricks) do
         brick:update(dt)
     end
 
@@ -286,25 +316,28 @@ end
 
 function PlayState:render()
     -- render bricks
-    for k, brick in pairs(self.bricks) do
+    for _, brick in pairs(self.bricks) do
         brick:render()
     end
 
     -- render all particle systems
-    for k, brick in pairs(self.bricks) do
+    for _, brick in pairs(self.bricks) do
         brick:renderParticles()
     end
 
+    -- render paddle, ball, multiball powerup, key powerup
     self.paddle:render()
-
     for _, ball in pairs(self.balls) do
         ball:render()
     end
-
     self.powerup:render()
+    self.powerkey:render()
 
     renderScore(self.score)
     renderHealth(self.health)
+    if self.haskey == true then
+        renderKey()
+    end
 
     -- pause text, if paused
     if self.paused then
