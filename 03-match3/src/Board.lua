@@ -27,10 +27,10 @@ function Board:initializeTiles()
         color will vary based on level
         lv1, 2 starts from 4 colors only up to 10 colors on lv10++
     ]]
-    self.colors = {1, 2, 5, 6}
-    if self.level >= 3 then table.insert(self.colors, 9) end
-    if self.level >= 5 then table.insert(self.colors, 10) end
-    if self.level >= 7 then table.insert(self.colors, 13) end
+    self.colors = {1, 2, 5, 9}
+    if self.level >= 3 then table.insert(self.colors, 10) end
+    if self.level >= 5 then table.insert(self.colors, 13) end
+    if self.level >= 7 then table.insert(self.colors, 8) end
     if self.level >= 8 then table.insert(self.colors, 14) end
     if self.level >= 9 then table.insert(self.colors, 17) end
     if self.level >= 10 then table.insert(self.colors, 18) end

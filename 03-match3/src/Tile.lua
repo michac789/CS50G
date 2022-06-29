@@ -14,7 +14,6 @@
 Tile = Class{}
 
 function Tile:init(x, y, color, variety)
-    
     -- board positions
     self.gridX = x
     self.gridY = y
@@ -26,10 +25,21 @@ function Tile:init(x, y, color, variety)
     -- tile appearance/points
     self.color = color
     self.variety = variety
+
+    -- shiny tile
+    self.shiny = math.random(10) == 1 and true or false
+    self.tilealpha = 0.4
+    Timer.every(2, function()
+        Timer.tween(1, {[self] = {tilealpha = 0.05}}):finish(
+            function()
+            Timer.tween(1, {[self] = {tilealpha = 0.45}})
+            end
+        )
+    end)
 end
 
 function Tile:render(x, y)
-    
+
     -- draw shadow
     love.graphics.setColor(34, 32, 52, 255)
     love.graphics.draw(gTextures['main'], gFrames['tiles'][self.color][self.variety],
@@ -39,4 +49,12 @@ function Tile:render(x, y)
     love.graphics.setColor(255, 255, 255, 255)
     love.graphics.draw(gTextures['main'], gFrames['tiles'][self.color][self.variety],
         self.x + x, self.y + y)
+
+    -- render shiny block
+    if self.shiny then
+        love.graphics.setColor(255/255, 255/255, 255/255, self.tilealpha)
+        love.graphics.rectangle('fill', (self.gridX - 1) * 32 + (VIRTUAL_WIDTH - 272),
+            (self.gridY - 1) * 32 + 16, 32, 32, 4)
+        love.graphics.setColor(255, 255, 255, 255)
+    end
 end
