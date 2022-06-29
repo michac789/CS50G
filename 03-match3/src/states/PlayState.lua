@@ -142,39 +142,40 @@ function PlayState:update(dt)
                 gSounds['error']:play()
                 self.highlightedTile = nil
             else
-
-                -- swap grid positions of tiles
-                local tempX = self.highlightedTile.gridX
-                local tempY = self.highlightedTile.gridY
-
+                -- swap the tile, tween coordinates and falling blocks
                 local newTile = self.board.tiles[y][x]
-
-                self.highlightedTile.gridX = newTile.gridX
-                self.highlightedTile.gridY = newTile.gridY
-                newTile.gridX = tempX
-                newTile.gridY = tempY
-
-                -- swap tiles in the tiles table
-                self.board.tiles[self.highlightedTile.gridY][self.highlightedTile.gridX] =
-                    self.highlightedTile
-
-                self.board.tiles[newTile.gridY][newTile.gridX] = newTile
-
-                -- tween coordinates between the two so they swap
-                Timer.tween(0.1, {
-                    [self.highlightedTile] = {x = newTile.x, y = newTile.y},
-                    [newTile] = {x = self.highlightedTile.x, y = self.highlightedTile.y}
-                })
-
-                -- once the swap is finished, we can tween falling blocks as needed
-                :finish(function()
-                    self:calculateMatches()
-                end)
+                self:swaptile(self.highlightedTile, newTile):finish(
+                    function()
+                        if self:calculateMatches() == false then
+                            -- only allow swapping when it results in a match
+                            gSounds['error']:play()
+                            self:swaptile(self.highlightedTile, newTile)
+                        else
+                            -- if there are not matches possible to perform, reset the board
+                            -- TODO (highly unlikely though)
+                        end
+                        self.highlightedTile = nil
+                        self.canInput = true
+                    end)
             end
         end
     end
 
     Timer.update(dt)
+end
+
+-- helper function to swap two tiles
+function PlayState:swaptile(t1, t2)
+    local tempX = t1.gridX
+    local tempY = t1.gridY
+    t1.gridX, t1.gridY = t2.gridX, t2.gridY
+    t2.gridX, t2.gridY = tempX, tempY
+    self.board.tiles[t1.gridY][t1.gridX] = t1
+    self.board.tiles[t2.gridY][t2.gridX] = t2
+    return Timer.tween(0.1, {
+        [t1] = {x = t2.x, y = t2.y},
+        [t2] = {x = t1.x, y = t1.y}
+    })
 end
 
 --[[
@@ -184,7 +185,6 @@ end
     to the Board class.
 ]]
 function PlayState:calculateMatches()
-    self.highlightedTile = nil
 
     -- if we have any matches, remove them and tween the falling blocks that result
     local matches = self.board:calculateMatches()
@@ -219,10 +219,11 @@ function PlayState:calculateMatches()
             -- as a result of falling blocks once new blocks have finished falling
             self:calculateMatches()
         end)
+        return true
 
-    -- if no matches, we can continue playing
+    -- if no matches, reverse the swap
     else
-        self.canInput = true
+        return false
     end
 end
 
@@ -232,7 +233,7 @@ function PlayState:render()
 
     -- render highlighted tile if it exists
     if self.highlightedTile then
-        
+
         -- multiply so drawing white rect makes it brighter
         love.graphics.setBlendMode('add')
 
