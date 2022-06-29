@@ -32,7 +32,7 @@ function Tile:init(x, y, color, variety)
     Timer.every(2, function()
         Timer.tween(1, {[self] = {tilealpha = 0.05}}):finish(
             function()
-            Timer.tween(1, {[self] = {tilealpha = 0.45}})
+            Timer.tween(1, {[self] = {tilealpha = 0.35}})
             end
         )
     end)

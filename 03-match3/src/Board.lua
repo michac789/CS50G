@@ -43,7 +43,7 @@ function Board:initializeTiles()
         table.insert(self.tiles, {})
 
         for tileX = 1, 8 do
-            
+
             -- create a new tile at X,Y with a random color and variety
             table.insert(self.tiles[tileY], Tile(tileX, tileY,
                 self.colors[math.random(1, #self.colors)],
@@ -53,7 +53,7 @@ function Board:initializeTiles()
     end
 
     while self:calculateMatches() do
-        
+
         -- recursively initialize if matches were returned so we always have
         -- a matchless board on start
         self:initializeTiles()
@@ -74,17 +74,18 @@ function Board:calculateMatches()
     -- horizontal matches first
     for y = 1, 8 do
         local colorToMatch = self.tiles[y][1].color
-
+        -- we do not have to keep the exact shiny tile
+        -- for horizontal match, it does not matter as anyway a row will be destroyed
+        local destroyrow = false
         matchNum = 1
-        
+
         -- every horizontal tile
         for x = 2, 8 do
-            
+
             -- if this is the same color as the one we're trying to match...
             if self.tiles[y][x].color == colorToMatch then
                 matchNum = matchNum + 1
             else
-                
                 -- set this as the new color we want to watch for
                 colorToMatch = self.tiles[y][x].color
 
@@ -92,11 +93,25 @@ function Board:calculateMatches()
                 if matchNum >= 3 then
                     local match = {}
 
-                    -- go backwards from here by matchNum
+                    -- check if there is a shiny tile
                     for x2 = x - 1, x - matchNum, -1 do
-                        
-                        -- add each tile to the match that's in that match
-                        table.insert(match, self.tiles[y][x2])
+                        if self.tiles[y][x2].shiny then
+                            destroyrow = true
+                        end
+                    end
+
+                    if destroyrow then
+                        -- add all tiles in a row if there is at least one shiny tile
+                        for x2 = 1, 8 do
+                            gSounds['destroyrow']:play()
+                            table.insert(match, self.tiles[y][x2])
+                        end
+                    else
+                        -- go backwards from here by matchNum
+                        for x2 = x - 1, x - matchNum, -1 do
+                            -- add each tile to the match that's in that match
+                            table.insert(match, self.tiles[y][x2])
+                        end
                     end
 
                     -- add this match to our total matches table
@@ -115,10 +130,25 @@ function Board:calculateMatches()
         -- account for the last row ending with a match
         if matchNum >= 3 then
             local match = {}
-            
-            -- go backwards from end of last row by matchNum
-            for x = 8, 8 - matchNum + 1, -1 do
-                table.insert(match, self.tiles[y][x])
+
+            -- check if there is a shiny tile
+            for x2 = 8, 8 - matchNum + 1, -1 do
+                if self.tiles[y][x2].shiny then
+                    destroyrow = true
+                end
+            end
+
+            if destroyrow then
+                -- insert a whole row when shiny block destroy a row
+                for x2 = 1, 8 do
+                    gSounds['destroyrow']:play()
+                    table.insert(match, self.tiles[y][x2])
+                end
+            else
+                -- go backwards from end of last row by matchNum
+                for x = 8, 8 - matchNum + 1, -1 do
+                    table.insert(match, self.tiles[y][x])
+                end
             end
 
             table.insert(matches, match)
@@ -128,6 +158,9 @@ function Board:calculateMatches()
     -- vertical matches
     for x = 1, 8 do
         local colorToMatch = self.tiles[1][x].color
+        -- we have to keep track which row has shiny tile
+        -- (make sure we are destroying the correct row)
+        local destroyrow = nil
 
         matchNum = 1
 
@@ -141,6 +174,22 @@ function Board:calculateMatches()
                 if matchNum >= 3 then
                     local match = {}
 
+                    -- check if there is a shiny tile
+                    for y2 = y - 1, y - matchNum, -1 do
+                        if self.tiles[y2][x].shiny then
+                            destroyrow = y2
+                        end
+                    end
+
+                    -- destroy a particular row that has the shiny tile
+                    if destroyrow ~= nil then
+                        for x2 = 1, 8 do
+                            gSounds['destroyrow']:play()
+                            table.insert(match, self.tiles[destroyrow][x2])
+                        end
+                    end
+
+                    -- destroy vertical tiles of a match
                     for y2 = y - 1, y - matchNum, -1 do
                         table.insert(match, self.tiles[y2][x])
                     end
@@ -160,7 +209,21 @@ function Board:calculateMatches()
         -- account for the last column ending with a match
         if matchNum >= 3 then
             local match = {}
-            
+
+            for y2 = 8, 8 - matchNum, -1 do
+                if self.tiles[y2][x].shiny then
+                    destroyrow = y2
+                end
+            end
+
+            -- destroy whole row (vertical match case)
+            if destroyrow then
+                for x2 = 1, 8 do
+                    gSounds['destroyrow']:play()
+                    table.insert(match, self.tiles[destroyrow][x2])
+                end
+            end
+
             -- go backwards from end of last row by matchNum
             for y = 8, 8 - matchNum + 1, -1 do
                 table.insert(match, self.tiles[y][x])
