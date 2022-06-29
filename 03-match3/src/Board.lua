@@ -23,10 +23,22 @@ function Board:init(x, y, level)
 end
 
 function Board:initializeTiles()
+    --[[
+        color will vary based on level
+        lv1, 2 starts from 4 colors only up to 10 colors on lv10++
+    ]]
+    self.colors = {1, 2, 5, 6}
+    if self.level >= 3 then table.insert(self.colors, 9) end
+    if self.level >= 5 then table.insert(self.colors, 10) end
+    if self.level >= 7 then table.insert(self.colors, 13) end
+    if self.level >= 8 then table.insert(self.colors, 14) end
+    if self.level >= 9 then table.insert(self.colors, 17) end
+    if self.level >= 10 then table.insert(self.colors, 18) end
+
     self.tiles = {}
 
     for tileY = 1, 8 do
-        
+
         -- empty table that will serve as a new row
         table.insert(self.tiles, {})
 
@@ -34,7 +46,7 @@ function Board:initializeTiles()
             
             -- create a new tile at X,Y with a random color and variety
             table.insert(self.tiles[tileY], Tile(tileX, tileY,
-                (math.random(1, 3) - 1) * 4 + math.random(1, 2),
+                self.colors[math.random(1, #self.colors)],
                 math.random(math.min(6, self.level))
             ))
         end
@@ -245,7 +257,7 @@ function Board:getFallingTiles()
 
                 -- new tile with random color and variety
                 local tile = Tile(x, y,
-                    (math.random(1, 3) - 1) * 4 + math.random(1, 2),
+                    self.colors[math.random(1, #self.colors)],
                     math.random(math.min(6, self.level))
                 )
                 tile.y = -32
