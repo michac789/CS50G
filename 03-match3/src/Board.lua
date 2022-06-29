@@ -210,7 +210,7 @@ function Board:calculateMatches()
         if matchNum >= 3 then
             local match = {}
 
-            for y2 = 8, 8 - matchNum, -1 do
+            for y2 = 8, 8 - matchNum + 1, -1 do
                 if self.tiles[y2][x].shiny then
                     destroyrow = y2
                 end

@@ -28,13 +28,9 @@ end
 
 function GameOverState:render()
     love.graphics.setFont(gFonts['large'])
-
-    love.graphics.setColor(56, 56, 56, 234)
-    love.graphics.rectangle('fill', VIRTUAL_WIDTH / 2 - 64, 64, 128, 136, 4)
-
-    love.graphics.setColor(99, 155, 255, 255)
-    love.graphics.print('GAME OVER', VIRTUAL_WIDTH / 2 - 64, 64, 128, 'center')
+    love.graphics.setColor(99, 155, 100, 255)
+    love.graphics.printf('GAME OVER', 0, 64, VIRTUAL_WIDTH, 'center')
     love.graphics.setFont(gFonts['medium'])
-    love.graphics.print('Your Score: ' .. tostring(self.score), VIRTUAL_WIDTH / 2 - 64, 140, 128, 'center')
-    love.graphics.print('Press Enter', VIRTUAL_WIDTH / 2 - 64, 180, 128, 'center')
+    love.graphics.printf('Your Score: ' .. tostring(self.score), 0, 140, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf('Press Enter', 0, 180, VIRTUAL_WIDTH, 'center')
 end
