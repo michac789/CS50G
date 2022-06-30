@@ -41,7 +41,7 @@ function love.load()
     math.randomseed(os.time())
 
     tiles = {}
-    
+
     -- tilesheet image and quads for it, which will map to our IDs
     tilesheet = love.graphics.newImage('tiles.png')
     quads = GenerateQuads(tilesheet, TILE_SIZE, TILE_SIZE)
@@ -75,7 +75,7 @@ function love.load()
 
     -- direction the character is facing
     direction = 'right'
-    
+
     mapWidth = 20
     mapHeight = 20
 
@@ -88,8 +88,8 @@ function love.load()
 
     for y = 1, mapHeight do
         table.insert(tiles, {})
-        
-        for x = 1, mapWidth do
+
+        for _ = 1, mapWidth do
             -- sky and bricks; this ID directly maps to whatever quad we want to render
             table.insert(tiles[y], {
                 id = y < 7 and SKY or GROUND
@@ -148,7 +148,7 @@ function love.update(dt)
         direction = 'left'
     elseif love.keyboard.isDown('right') then
         characterX = characterX + CHARACTER_MOVE_SPEED * dt
-        
+
         if characterDY == 0 then
             currentAnimation = movingAnimation
         end
@@ -170,7 +170,7 @@ function love.draw()
         -- as things are attempted to be drawn fractionally and then forced onto a small virtual canvas
         love.graphics.translate(-math.floor(cameraScroll), 0)
         love.graphics.clear(backgroundR, backgroundG, backgroundB, 1)
-        
+
         for y = 1, mapHeight do
             for x = 1, mapWidth do
                 local tile = tiles[y][x]
