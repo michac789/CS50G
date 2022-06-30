@@ -6,7 +6,8 @@
         "smallFont",
         "largeFont",
         "sounds",
-        "scoreFont"
+        "scoreFont",
+        "self"
     ],
     "Lua.diagnostics.disable": [
         "lowercase-global"
