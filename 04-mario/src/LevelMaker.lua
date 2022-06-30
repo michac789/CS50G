@@ -29,6 +29,46 @@ function LevelMaker.generate(width, height)
     }
     local frameid = math.random(3, 6)
 
+    -- function used in oncollide (of locks) to reveal flag & flagpole
+    local revealflag = function(_)
+        if keyslocks['keypicked'] then
+            gSounds['powerup-reveal']:play()
+            table.insert(objects,
+                GameObject {
+                    texture = "flagpoles",
+                    x = (width - 1) * TILE_SIZE - 8,
+                    y = 3 * TILE_SIZE,
+                    width = 16,
+                    height = 48,
+                    frame = frameid,
+                    collidable = false,
+                    consumable = true,
+                    solid = false,
+                    onConsume = function (player, _)
+                        gSounds['pickup']:play()
+                        gStateMachine:change('play', {
+                            levelwidth = width + 20,
+                            score = player.score,
+                        })
+                    end
+                })
+                table.insert(objects,
+                GameObject {
+                    texture = "flags",
+                    x = (width - 1) * TILE_SIZE,
+                    y = 3 * TILE_SIZE,
+                    width = 16,
+                    height = 48,
+                    frame = 9 * (frameid - 2) - 2,
+                    collidable = false,
+                    consumable = false,
+                    solid = false,
+                })
+        else
+            gSounds['empty-block']:play()
+        end
+    end
+
     -- insert blank tables into tiles for later access
     for _ = 1, height do
         table.insert(tiles, {})
@@ -98,7 +138,7 @@ function LevelMaker.generate(width, height)
                             collidable = true,
                             consumable = true,
                             solid = false,
-                            onConsume = function(player, object)
+                            onConsume = function(_, _)
                                 gSounds['pickup']:play()
                                 keyslocks['keypicked'] = true
                             end
@@ -167,7 +207,7 @@ function LevelMaker.generate(width, height)
                                         solid = false,
 
                                         -- gem has its own function to add to the player's score
-                                        onConsume = function(player, object)
+                                        onConsume = function(player, _)
                                             gSounds['pickup']:play()
                                             player.score = player.score + 100
                                         end
@@ -189,10 +229,9 @@ function LevelMaker.generate(width, height)
                         end
                     }
                 )
-            end
 
             -- chance to spawn key
-            if math.random(20) == 1 and keyslocks['keyplaced'] == false and x > math.floor(width / 2) and x < width - 1 then
+            elseif math.random(20) == 1 and keyslocks['keyplaced'] == false and x > math.floor(width / 2) and x < width - 1 then
                 table.insert(objects,
                     GameObject {
                         texture = "keyslocks",
@@ -204,7 +243,7 @@ function LevelMaker.generate(width, height)
                         collidable = true,
                         consumable = true,
                         solid = false,
-                        onConsume = function(player, object)
+                        onConsume = function(_, _)
                             gSounds['pickup']:play()
                             keyslocks['keypicked'] = true
                         end
@@ -221,52 +260,10 @@ function LevelMaker.generate(width, height)
                         width = 16,
                         height = 16,
                         frame = keyslocks['id'] + 4,
-                        collidable = false,
+                        collidable = true,
                         consumable = false,
                         solid = true,
-                        onCollide = function(obj)
-                            if keyslocks['keypicked'] then
-                                obj.consumable = true
-                                obj.solid = false
-                                obj.collidable = true
-                                obj.onConsume = function(player, object)
-                                    gSounds['powerup-reveal']:play()
-                                    table.insert(objects,
-                                        GameObject {
-                                            texture = "flagpoles",
-                                            x = (width - 1) * TILE_SIZE - 8,
-                                            y = 3 * TILE_SIZE,
-                                            width = 16,
-                                            height = 48,
-                                            frame = frameid,
-                                            collidable = false,
-                                            consumable = true,
-                                            solid = false,
-                                            onConsume = function ()
-                                                gSounds['pickup']:play()
-                                                gStateMachine:change('play', {
-                                                    levelwidth = width + 20,
-                                                    score = player.score,
-                                                })
-                                            end
-                                        })
-                                        table.insert(objects,
-                                        GameObject {
-                                            texture = "flags",
-                                            x = (width - 1) * TILE_SIZE,
-                                            y = 3 * TILE_SIZE,
-                                            width = 16,
-                                            height = 48,
-                                            frame = 9 * (frameid - 2) - 2,
-                                            collidable = false,
-                                            consumable = false,
-                                            solid = false,
-                                        })
-                                end
-                            else
-                                gSounds['empty-block']:play()
-                            end
-                        end,
+                        onCollide = revealflag,
                     })
                 keyslocks['lockplaced'] = true
             end
