@@ -27,6 +27,7 @@ function LevelMaker.generate(width, height)
         ['keyplaced'] = false,
         ['lockplaced'] = false
     }
+    local frameid = math.random(3, 6)
 
     -- insert blank tables into tiles for later access
     for _ = 1, height do
@@ -60,8 +61,9 @@ function LevelMaker.generate(width, height)
                     Tile(x, y, tileID, y == 7 and topper or nil, tileset, topperset))
             end
 
+            -- additional: make sure no pillar or other item spawn on 2 rightmost tile (for flag)
             -- chance to generate a pillar
-            if math.random(8) == 1 then
+            if math.random(8) == 1 and x < width - 1 then
                 blockHeight = 2
 
                 -- chance to generate bush on pillar
@@ -111,7 +113,7 @@ function LevelMaker.generate(width, height)
                 tiles[7][x].topper = nil
 
             -- chance to generate bushes
-            elseif math.random(7) == 1 then
+            elseif math.random(7) == 1 and x < width - 1 then
                 table.insert(objects,
                     GameObject {
                         texture = 'bushes',
@@ -126,7 +128,7 @@ function LevelMaker.generate(width, height)
             end
 
             -- chance to spawn a block
-            if math.random(10) == 1 then
+            if math.random(10) == 1 and x < width - 1 then
                 table.insert(objects,
 
                     -- jump block
@@ -190,7 +192,7 @@ function LevelMaker.generate(width, height)
             end
 
             -- chance to spawn key
-            if math.random(20) == 1 and keyslocks['keyplaced'] == false and x > math.floor(width / 2) then
+            if math.random(20) == 1 and keyslocks['keyplaced'] == false and x > math.floor(width / 2) and x < width - 1 then
                 table.insert(objects,
                     GameObject {
                         texture = "keyslocks",
@@ -206,12 +208,11 @@ function LevelMaker.generate(width, height)
                             gSounds['pickup']:play()
                             keyslocks['keypicked'] = true
                         end
-                    }
-                )
+                    })
                 keyslocks['keyplaced'] = true
+
             -- chance to spawn lock, only possible on last 30% of the map
-            elseif math.random(10) == 1 and keyslocks['lockplaced'] == false and x > math.floor(width * 0.7) then
-                lockobj = 
+            elseif math.random(10) == 1 and keyslocks['lockplaced'] == false and x > math.floor(width * 0.7) and x < width - 1 then
                 table.insert(objects,
                     GameObject {
                         texture = "keyslocks",
@@ -225,14 +226,45 @@ function LevelMaker.generate(width, height)
                         solid = true,
                         onCollide = function(obj)
                             if keyslocks['keypicked'] then
-                                gSounds['powerup-reveal']:play()
-                                obj.collidable = true
                                 obj.consumable = true
-                                -- TODO (spawn pole)
+                                obj.solid = false
+                                obj.collidable = true
+                                obj.onConsume = function(player, object)
+                                    gSounds['powerup-reveal']:play()
+                                    table.insert(objects,
+                                        GameObject {
+                                            texture = "flagpoles",
+                                            x = (width - 1) * TILE_SIZE - 8,
+                                            y = 3 * TILE_SIZE,
+                                            width = 16,
+                                            height = 48,
+                                            frame = frameid,
+                                            collidable = false,
+                                            consumable = true,
+                                            solid = false,
+                                            onConsume = function ()
+                                                gSounds['pickup']:play()
+                                                gStateMachine:change('play')
+                                            end
+                                        })
+                                        table.insert(objects,
+                                        GameObject {
+                                            texture = "flags",
+                                            x = (width - 1) * TILE_SIZE,
+                                            y = 3 * TILE_SIZE,
+                                            width = 16,
+                                            height = 48,
+                                            frame = 9 * (frameid - 2) - 2,
+                                            collidable = false,
+                                            consumable = false,
+                                            solid = false,
+                                        })
+                                end
+                            else
+                                gSounds['empty-block']:play()
                             end
-                        end
-                    }
-                )
+                        end,
+                    })
                 keyslocks['lockplaced'] = true
             end
         end

@@ -10,7 +10,7 @@ PlayState = Class{__includes = BaseState}
 function PlayState:init()
     self.camX = 0
     self.camY = 0
-    self.level = LevelMaker.generate(100, 10)
+    self.level = LevelMaker.generate(20, 10)
     self.tileMap = self.level.tileMap
     self.background = math.random(3)
     self.backgroundX = 0
@@ -87,10 +87,6 @@ function PlayState:render()
     love.graphics.print(tostring(self.player.score), 5, 5)
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.print(tostring(self.player.score), 4, 4)
-
-    -- TEMPORARY DEBUGGING PURPOSE - DELETE THIS LATER !!!
-    love.graphics.print(tostring(1), 10, 30)
-    love.graphics.print(tostring(2), 10, 50)
 end
 
 function PlayState:updateCamera()
