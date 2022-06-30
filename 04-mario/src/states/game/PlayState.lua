@@ -18,8 +18,16 @@ function PlayState:init()
     self.gravityOn = true
     self.gravityAmount = 6
 
+    -- ensure that player does not spawn on a chasm
+    self.xstart = -16
+    local i = 0
+    repeat
+        self.xstart = self.xstart + 16
+        i = i + 1
+    until self.level.tileMap.tiles[10][i].id ~= TILE_ID_EMPTY
+
     self.player = Player({
-        x = 0, y = 0,
+        x = self.xstart, y = 0,
         width = 16, height = 20,
         texture = 'green-alien',
         stateMachine = StateMachine {
@@ -64,21 +72,25 @@ function PlayState:render()
     love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 256), 0)
     love.graphics.draw(gTextures['backgrounds'], gFrames['backgrounds'][self.background], math.floor(-self.backgroundX + 256),
         gTextures['backgrounds']:getHeight() / 3 * 2, 0, 1, -1)
-    
+
     -- translate the entire view of the scene to emulate a camera
     love.graphics.translate(-math.floor(self.camX), -math.floor(self.camY))
-    
+
     self.level:render()
 
     self.player:render()
     love.graphics.pop()
-    
+
     -- render score
     love.graphics.setFont(gFonts['medium'])
     love.graphics.setColor(0, 0, 0, 1)
     love.graphics.print(tostring(self.player.score), 5, 5)
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.print(tostring(self.player.score), 4, 4)
+
+    -- TEMPORARY DEBUGGING PURPOSE - DELETE THIS LATER !!!
+    love.graphics.print(tostring(1), 10, 30)
+    love.graphics.print(tostring(2), 10, 50)
 end
 
 function PlayState:updateCamera()
@@ -109,7 +121,7 @@ function PlayState:spawnEnemies()
 
                     -- random chance, 1 in 20
                     if math.random(20) == 1 then
-                        
+
                         -- instantiate snail, declaring in advance so we can pass it into state machine
                         local snail
                         snail = Snail {
