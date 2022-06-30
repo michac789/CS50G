@@ -45,7 +45,7 @@ function LevelMaker.generate(width, height)
         end
 
         -- chance to just be emptiness
-        if math.random(7) == 1 then
+        if math.random(7) == 1 and x < width - 1 then
             for y = 7, height do
                 table.insert(tiles[y],
                     Tile(x, y, tileID, nil, tileset, topperset))
@@ -244,7 +244,10 @@ function LevelMaker.generate(width, height)
                                             solid = false,
                                             onConsume = function ()
                                                 gSounds['pickup']:play()
-                                                gStateMachine:change('play')
+                                                gStateMachine:change('play', {
+                                                    levelwidth = width + 20,
+                                                    score = player.score,
+                                                })
                                             end
                                         })
                                         table.insert(objects,

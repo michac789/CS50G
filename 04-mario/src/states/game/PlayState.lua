@@ -7,16 +7,11 @@
 
 PlayState = Class{__includes = BaseState}
 
-function PlayState:init()
-    self.camX = 0
-    self.camY = 0
-    self.level = LevelMaker.generate(20, 10)
+-- keep track of level and score
+function PlayState:enter(params)
+    self.score = params.score
+    self.level = LevelMaker.generate(params.levelwidth, 10)
     self.tileMap = self.level.tileMap
-    self.background = math.random(3)
-    self.backgroundX = 0
-
-    self.gravityOn = true
-    self.gravityAmount = 6
 
     -- ensure that player does not spawn on a chasm
     self.xstart = -16
@@ -39,10 +34,20 @@ function PlayState:init()
         map = self.tileMap,
         level = self.level
     })
+    self.player.score = self.score
 
     self:spawnEnemies()
-
     self.player:changeState('falling')
+end
+
+function PlayState:init()
+    self.camX = 0
+    self.camY = 0
+    self.background = math.random(3)
+    self.backgroundX = 0
+
+    self.gravityOn = true
+    self.gravityAmount = 6
 end
 
 function PlayState:update(dt)
