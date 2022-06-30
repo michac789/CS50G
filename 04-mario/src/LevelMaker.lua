@@ -30,9 +30,10 @@ function LevelMaker.generate(width, height)
     local frameid = math.random(3, 6)
 
     -- function used in oncollide (of locks) to reveal flag & flagpole
-    local revealflag = function(_)
+    local revealflag = function(obj)
         if keyslocks['keypicked'] then
             gSounds['powerup-reveal']:play()
+            obj.x = -100
             table.insert(objects,
                 GameObject {
                     texture = "flagpoles",
