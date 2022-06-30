@@ -20,6 +20,14 @@ function LevelMaker.generate(width, height)
     local tileset = math.random(20)
     local topperset = math.random(20)
 
+    -- key & locks variable tracker
+    local keyslocks = {
+        ['keypicked'] = false,
+        ['id'] = math.random(1, 4),
+        ['keyplaced'] = false,
+        ['lockplaced'] = false
+    }
+
     -- insert blank tables into tiles for later access
     for _ = 1, height do
         table.insert(tiles, {})
@@ -73,6 +81,30 @@ function LevelMaker.generate(width, height)
                     )
                 end
 
+                -- chance of putting a key above a pillar if not placed yet
+                -- randomize the position as well vertically (should be above bush if there is any)
+                -- only place key on last half of the map (prevent key from appearing from start)
+                if math.random(10) == 1 and keyslocks['keyplaced'] == false and x > math.floor(width / 2) then
+                    table.insert(objects,
+                        GameObject {
+                            texture = "keyslocks",
+                            x = (x - 1) * TILE_SIZE,
+                            y = math.random(0, 2) * TILE_SIZE,
+                            width = 16,
+                            height = 16,
+                            frame = keyslocks['id'],
+                            collidable = true,
+                            consumable = true,
+                            solid = false,
+                            onConsume = function(player, object)
+                                gSounds['pickup']:play()
+                                keyslocks['keypicked'] = true
+                            end
+                        }
+                    )
+                    keyslocks['keyplaced'] = true
+                end
+
                 -- pillar tiles
                 tiles[5][x] = Tile(x, 5, tileID, topper, tileset, topperset)
                 tiles[6][x] = Tile(x, 6, tileID, nil, tileset, topperset)
@@ -118,7 +150,7 @@ function LevelMaker.generate(width, height)
                             if not obj.hit then
 
                                 -- chance to spawn gem, not guaranteed
-                                if math.random(5) == 1 then
+                                if math.random(3) == 1 then
 
                                     -- maintain reference so we can set it to nil
                                     local gem = GameObject {
@@ -156,11 +188,63 @@ function LevelMaker.generate(width, height)
                     }
                 )
             end
+
+            -- chance to spawn key
+            if math.random(20) == 1 and keyslocks['keyplaced'] == false and x > math.floor(width / 2) then
+                table.insert(objects,
+                    GameObject {
+                        texture = "keyslocks",
+                        x = (x - 1) * TILE_SIZE,
+                        y = math.random(1, 2) * TILE_SIZE,
+                        width = 16,
+                        height = 16,
+                        frame = keyslocks['id'],
+                        collidable = true,
+                        consumable = true,
+                        solid = false,
+                        onConsume = function(player, object)
+                            gSounds['pickup']:play()
+                            keyslocks['keypicked'] = true
+                        end
+                    }
+                )
+                keyslocks['keyplaced'] = true
+            -- chance to spawn lock, only possible on last 30% of the map
+            elseif math.random(10) == 1 and keyslocks['lockplaced'] == false and x > math.floor(width * 0.7) then
+                lockobj = 
+                table.insert(objects,
+                    GameObject {
+                        texture = "keyslocks",
+                        x = (x - 1) * TILE_SIZE,
+                        y = 1 * TILE_SIZE,
+                        width = 16,
+                        height = 16,
+                        frame = keyslocks['id'] + 4,
+                        collidable = false,
+                        consumable = false,
+                        solid = true,
+                        onCollide = function(obj)
+                            if keyslocks['keypicked'] then
+                                gSounds['powerup-reveal']:play()
+                                obj.collidable = true
+                                obj.consumable = true
+                                -- TODO (spawn pole)
+                            end
+                        end
+                    }
+                )
+                keyslocks['lockplaced'] = true
+            end
         end
     end
 
     local map = TileMap(width, height)
     map.tiles = tiles
+
+    -- if key or lock is not placed yet, regenerate the level
+    if keyslocks['keyplaced'] == false or keyslocks['lockplaced'] == false then
+        return LevelMaker.generate(width, height)
+    end
 
     return GameLevel(entities, objects, map)
 end
