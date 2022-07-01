@@ -53,6 +53,7 @@ function PlayerWalkState:update(dt)
     -- when 'c' key pressed: if colliding with pot, carry the pot, else the drop the pot
     if love.keyboard.isDown('c') and self.entity.allowpress == true then
         self.entity.allowpress = false
+        self.entity.countdown = 0.5
         if self.entity.carrypot then
             Event.dispatch('droppot', self.entity)
         else

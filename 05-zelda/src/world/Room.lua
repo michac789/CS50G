@@ -34,6 +34,7 @@ function Room:init(player)
     -- reference to player for collisions, etc.
     self.player = player
     self.projectiles = {}
+    self.timethrown = 0
 
     -- used for centering the dungeon rendering
     self.renderOffsetX = MAP_RENDER_OFFSET_X
@@ -83,6 +84,7 @@ function Room:init(player)
     -- when pot is thrown
     Event.on('throwpot', function(entity)
         self.player.carrypot = false
+        self.timethrown = 2
         self.player:changeState('idle')
         -- make pot as projectile
         local pot = GameObject(
@@ -90,8 +92,8 @@ function Room:init(player)
         )
         if self.player.direction == "left" then pot.dx = -32
         elseif self.player.direction == "right" then pot.dx = 32
-        elseif self.player.direction == "top" then pot.dx = -32
-        elseif self.player.direction == "down" then pot.dx = 32
+        elseif self.player.direction == "up" then pot.dy = -32
+        elseif self.player.direction == "down" then pot.dy = 32
         end
         table.insert(self.projectiles, pot)
     end)
@@ -219,6 +221,7 @@ function Room:generateWallsAndFloors()
 end
 
 function Room:update(dt)
+    self.timethrown = self.timethrown - dt
 
     -- don't update anything if we are sliding to another room (we have offsets)
     if self.adjacentOffsetX ~= 0 or self.adjacentOffsetY ~= 0 then return end
@@ -257,21 +260,34 @@ function Room:update(dt)
         end
     end
 
-    for _, projectile in pairs(self.projectiles) do
+    -- remove projectile on any of these 3 conditions
+    for i, projectile in pairs(self.projectiles) do
         projectile:update(dt)
 
         -- collision of projectile with walls TODO
+        if projectile.x < MAP_RENDER_OFFSET_X + 5
+            or projectile.x > VIRTUAL_WIDTH - MAP_RENDER_OFFSET_X - 20
+            or projectile.y < MAP_RENDER_OFFSET_Y + 5
+            or projectile.y > VIRTUAL_HEIGHT - MAP_RENDER_OFFSET_Y - 20 then
+            gSounds['crash']:play()
+            table.remove(self.projectiles, i)
+        end
 
-        -- travelling for more than 4 tiles TODO
+        -- travelling for more than 4 tiles
+        if self.timethrown < 0 then
+            gSounds['crash']:play()
+            table.remove(self.projectiles, i)
+        end
 
         -- collision of projectile with other entities
         for _, entity in pairs(self.entities) do
             if projectile:collides(entity) then
                 gSounds['crash']:play()
                 entity.health = entity.health - 1
-                projectile.x, projectile.y = -100, -100
+                table.remove(self.projectiles, i)
             end
         end
+
     end
 end
 

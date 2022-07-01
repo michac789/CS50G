@@ -43,7 +43,7 @@ function Entity:init(def)
 
     -- prevent infinitely carry and dropping pot behaviour (since both uses the same key)
     self.allowpress = true
-    Timer.every(0.5, function() self.allowpress = true end)
+    self.countdown = 0.5
 end
 
 function Entity:createAnimations(animations)
@@ -86,6 +86,12 @@ function Entity:changeAnimation(name)
 end
 
 function Entity:update(dt)
+    self.countdown = self.countdown - dt
+
+    if self.countdown < 0 then
+        self.allowpress = true
+    end
+
     if self.invulnerable then
         self.flashTimer = self.flashTimer + dt
         self.invulnerableTimer = self.invulnerableTimer + dt
