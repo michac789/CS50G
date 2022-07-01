@@ -29,12 +29,23 @@ function GameObject:init(def, x, y)
     self.width = def.width
     self.height = def.height
 
+    -- extra params needed for projectile travel speed
+    self.dx = 0
+    self.dy = 0
+
     -- default empty collision callback
     self.onCollide = function() end
 end
 
 function GameObject:update(dt)
+    self.x = self.x + self.dx * dt
+    self.y = self.y + self.dy * dt
+end
 
+function GameObject:collides(target)
+    local selfY, selfHeight = self.y + self.height / 2, self.height - self.height / 2
+    return not (self.x + self.width < target.x or self.x > target.x + target.width or
+                selfY + selfHeight < target.y or selfY > target.y + target.height)
 end
 
 function GameObject:render(adjacentOffsetX, adjacentOffsetY)

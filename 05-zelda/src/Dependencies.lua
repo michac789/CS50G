@@ -76,4 +76,5 @@ gSounds = {
     ['door'] = love.audio.newSource('sounds/door.wav', 'static'),
     ['potpicked'] = love.audio.newSource('sounds/potpicked.wav', 'static'),
     ['heartpicked'] = love.audio.newSource('sounds/heartpicked.wav', 'static'),
+    ['crash'] = love.audio.newSource('sounds/crash.wav', 'static'),
 }

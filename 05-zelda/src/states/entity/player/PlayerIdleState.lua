@@ -25,11 +25,24 @@ function PlayerIdleState:update(dt)
         self.entity:changeState('walk')
     end
 
+    -- if not carrying pot then swing sword, else throw pot as projectile
     if love.keyboard.wasPressed('space') then
         if self.entity.carrypot then
-            -- TODO
+            Event.dispatch('throwpot', self.entity)
         else
             self.entity:changeState('swing-sword')
         end
+    end
+
+    -- when 'c' key pressed: if colliding with pot, carry the pot, else the drop the pot
+    if love.keyboard.isDown('c') and self.entity.allowpress == true then
+        self.entity.allowpress = false
+        if self.entity.carrypot then
+            Event.dispatch('droppot', self.entity)
+        else
+            self.entity.cpressed = true
+        end
+    else
+        self.entity.cpressed = false
     end
 end

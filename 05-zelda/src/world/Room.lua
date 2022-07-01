@@ -33,6 +33,7 @@ function Room:init(player)
 
     -- reference to player for collisions, etc.
     self.player = player
+    self.projectiles = {}
 
     -- used for centering the dungeon rendering
     self.renderOffsetX = MAP_RENDER_OFFSET_X
@@ -45,7 +46,7 @@ function Room:init(player)
     -- chance on entities spawining heart when killed
     Event.on('entitydead', function(entity)
         entity.dead = true
-        if math.random(1, 3) == 1 then
+        if math.random(1, 5) == 1 then
             local heart = GameObject(
                 GAME_OBJECT_DEFS['heart'],
                 entity.x, entity.y
@@ -58,6 +59,41 @@ function Room:init(player)
             end
             table.insert(self.objects, heart)
         end
+    end)
+
+    -- drop the pot event
+    Event.on('droppot', function(entity)
+        self.player.carrypot = false
+        self.player.cpressed = false
+        self.player:changeState('idle')
+        local posX, posY = self.player.x, self.player.y
+        local pot = GameObject(
+            GAME_OBJECT_DEFS['pot'], posX, posY
+        )
+        pot.onCollide = function()
+            if self.player.cpressed then
+                gSounds['potpicked']:play()
+                self.player.carrypot = true
+                pot.x, pot.y = -100, -100
+            end
+        end
+        table.insert(self.objects, pot)
+    end)
+
+    -- when pot is thrown
+    Event.on('throwpot', function(entity)
+        self.player.carrypot = false
+        self.player:changeState('idle')
+        -- make pot as projectile
+        local pot = GameObject(
+            GAME_OBJECT_DEFS['pot'], entity.x, entity.y
+        )
+        if self.player.direction == "left" then pot.dx = -32
+        elseif self.player.direction == "right" then pot.dx = 32
+        elseif self.player.direction == "top" then pot.dx = -32
+        elseif self.player.direction == "down" then pot.dx = 32
+        end
+        table.insert(self.projectiles, pot)
     end)
 end
 
@@ -130,9 +166,11 @@ function Room:generateObjects()
                     VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16)
     )
     pot.onCollide = function()
-        gSounds['potpicked']:play()
-        self.player.carrypot = true
-        pot.x, pot.y = -100, -100
+        if self.player.cpressed then
+            gSounds['potpicked']:play()
+            self.player.carrypot = true
+            pot.x, pot.y = -100, -100
+        end
     end
 
     -- add to list of objects in scene (one switch and one pot)
@@ -218,6 +256,23 @@ function Room:update(dt)
             object:onCollide()
         end
     end
+
+    for _, projectile in pairs(self.projectiles) do
+        projectile:update(dt)
+
+        -- collision of projectile with walls TODO
+
+        -- travelling for more than 4 tiles TODO
+
+        -- collision of projectile with other entities
+        for _, entity in pairs(self.entities) do
+            if projectile:collides(entity) then
+                gSounds['crash']:play()
+                entity.health = entity.health - 1
+                projectile.x, projectile.y = -100, -100
+            end
+        end
+    end
 end
 
 function Room:render()
@@ -242,6 +297,10 @@ function Room:render()
 
     for k, entity in pairs(self.entities) do
         if not entity.dead then entity:render(self.adjacentOffsetX, self.adjacentOffsetY) end
+    end
+
+    for _, object in pairs(self.projectiles) do
+        object:render(self.adjacentOffsetX, self.adjacentOffsetY)
     end
 
     -- stencil out the door arches so it looks like the player is going through

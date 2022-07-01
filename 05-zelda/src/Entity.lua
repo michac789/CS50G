@@ -39,6 +39,11 @@ function Entity:init(def)
 
     self.dead = false
     self.carrypot = false
+    self.cpressed = false
+
+    -- prevent infinitely carry and dropping pot behaviour (since both uses the same key)
+    self.allowpress = true
+    Timer.every(0.5, function() self.allowpress = true end)
 end
 
 function Entity:createAnimations(animations)
