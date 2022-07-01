@@ -73,7 +73,7 @@ function love.load()
 
     for i = 1, 1000 do
         table.insert(dynamicBodies, {
-            love.physics.newBody(world, 
+            love.physics.newBody(world,
                 math.random(VIRTUAL_WIDTH), math.random(VIRTUAL_HEIGHT - 30), 'dynamic'),
             r = math.random(255) / 255,
             g = math.random(255) / 255,
@@ -98,7 +98,7 @@ function love.keypressed(key)
 end
 
 function love.update(dt)
-    
+
     -- update world, calculating collisions
     world:update(dt)
 end

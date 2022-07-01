@@ -71,7 +71,7 @@ function love.load()
     kinematicShape = love.physics.newRectangleShape(20, 20)
 
     for i = 1, 3 do
-        table.insert(kinematicBodies, love.physics.newBody(world, 
+        table.insert(kinematicBodies, love.physics.newBody(world,
             VIRTUAL_WIDTH / 2 - (30 * (2 - i)), VIRTUAL_HEIGHT / 2 + 45, 'kinematic'))
         table.insert(kinematicFixtures, love.physics.newFixture(kinematicBodies[i], kinematicShape))
 
@@ -91,14 +91,14 @@ function love.keypressed(key)
 end
 
 function love.update(dt)
-    
+
     -- update world, calculating collisions
     world:update(dt)
 end
 
 function love.draw()
     push:start()
-    
+
     -- draw a polygon shape by getting the world points for our body, using the box shape's
     -- definition as a reference
     love.graphics.setColor(0, 1, 0, 1)
