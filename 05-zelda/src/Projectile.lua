@@ -8,8 +8,9 @@
 
 Projectile = Class{}
 
-function Projectile:init()
-
+function Projectile:init(x, y)
+    self.x = x
+    self.y = y
 end
 
 function Projectile:update(dt)

@@ -18,24 +18,36 @@ function PlayerWalkState:init(player, dungeon)
 end
 
 function PlayerWalkState:update(dt)
+    -- animation depends whether pot is hold or not
     if love.keyboard.isDown('left') then
         self.entity.direction = 'left'
-        self.entity:changeAnimation('walk-left')
     elseif love.keyboard.isDown('right') then
         self.entity.direction = 'right'
-        self.entity:changeAnimation('walk-right')
     elseif love.keyboard.isDown('up') then
         self.entity.direction = 'up'
-        self.entity:changeAnimation('walk-up')
     elseif love.keyboard.isDown('down') then
         self.entity.direction = 'down'
-        self.entity:changeAnimation('walk-down')
     else
         self.entity:changeState('idle')
     end
 
+    -- display different animation when holding pot and when not holding pot
+    if love.keyboard.isDown('left') or love.keyboard.isDown('right') or
+        love.keyboard.isDown('up') or love.keyboard.isDown('down') then
+            if self.entity.carrypot then
+                self.entity:changeAnimation('pot-walk-' .. self.entity.direction)
+            else
+                self.entity:changeAnimation('walk-' .. self.entity.direction)
+            end
+    end
+
+    -- if not carrying pot swing sword, else throw pot as projectile
     if love.keyboard.wasPressed('space') then
-        self.entity:changeState('swing-sword')
+        if self.entity.carrypot then
+            -- TODO (throw pot as projectile)
+        else
+            self.entity:changeState('swing-sword')
+        end
     end
 
     -- perform base collision detection against walls
