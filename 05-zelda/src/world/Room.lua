@@ -1,3 +1,4 @@
+---@diagnostic disable: param-type-mismatch
 --[[
     GD50
     Legend of Zelda
@@ -40,6 +41,24 @@ function Room:init(player)
     -- used for drawing when this room is the next room, adjacent to the active
     self.adjacentOffsetX = 0
     self.adjacentOffsetY = 0
+
+    -- chance on entities spawining heart when killed
+    Event.on('entitydead', function(entity)
+        entity.dead = true
+        if math.random(1, 3) == 1 then
+            local heart = GameObject(
+                GAME_OBJECT_DEFS['heart'],
+                entity.x, entity.y
+            )
+            -- add 1 heart (+2 player.health) when heart is collected
+            heart.onCollide = function(obj)
+                obj.x, obj.y = -100, -100
+                gSounds['heartpicked']:play()
+                self.player.health = math.min(self.player.health + 2, 6)
+            end
+            table.insert(self.objects, heart)
+        end
+    end)
 end
 
 --[[
@@ -60,7 +79,7 @@ function Room:generateEntities()
                 VIRTUAL_WIDTH - TILE_SIZE * 2 - 16),
             y = math.random(MAP_RENDER_OFFSET_Y + TILE_SIZE,
                 VIRTUAL_HEIGHT - (VIRTUAL_HEIGHT - MAP_HEIGHT * TILE_SIZE) + MAP_RENDER_OFFSET_Y - TILE_SIZE - 16),
-            
+
             width = 16,
             height = 16,
 
@@ -92,7 +111,7 @@ function Room:generateObjects()
     switch.onCollide = function()
         if switch.state == 'unpressed' then
             switch.state = 'pressed'
-            
+
             -- open every door in the room if we press the switch
             for k, doorway in pairs(self.doorways) do
                 doorway.open = true
@@ -125,7 +144,7 @@ function Room:generateWallsAndFloors()
                 id = TILE_TOP_RIGHT_CORNER
             elseif x == self.width and y == self.height then
                 id = TILE_BOTTOM_RIGHT_CORNER
-            
+
             -- random left-hand walls, right walls, top, bottom, and floors
             elseif x == 1 then
                 id = TILE_LEFT_WALLS[math.random(#TILE_LEFT_WALLS)]
@@ -138,7 +157,7 @@ function Room:generateWallsAndFloors()
             else
                 id = TILE_FLOORS[math.random(#TILE_FLOORS)]
             end
-            
+
             table.insert(self.tiles[y], {
                 id = id
             })
@@ -147,7 +166,7 @@ function Room:generateWallsAndFloors()
 end
 
 function Room:update(dt)
-    
+
     -- don't update anything if we are sliding to another room (we have offsets)
     if self.adjacentOffsetX ~= 0 or self.adjacentOffsetY ~= 0 then return end
 
@@ -157,8 +176,8 @@ function Room:update(dt)
         local entity = self.entities[i]
 
         -- remove entity from the table if health is <= 0
-        if entity.health <= 0 then
-            entity.dead = true
+        if entity.health <= 0 and not entity.dead then
+            Event.dispatch('entitydead', entity)
         elseif not entity.dead then
             entity:processAI({room = self}, dt)
             entity:update(dt)
@@ -212,26 +231,26 @@ function Room:render()
 
     -- stencil out the door arches so it looks like the player is going through
     love.graphics.stencil(function()
-        
+
         -- left
         love.graphics.rectangle('fill', -TILE_SIZE - 6, MAP_RENDER_OFFSET_Y + (MAP_HEIGHT / 2) * TILE_SIZE - TILE_SIZE,
             TILE_SIZE * 2 + 6, TILE_SIZE * 2)
-        
+
         -- right
         love.graphics.rectangle('fill', MAP_RENDER_OFFSET_X + (MAP_WIDTH * TILE_SIZE),
             MAP_RENDER_OFFSET_Y + (MAP_HEIGHT / 2) * TILE_SIZE - TILE_SIZE, TILE_SIZE * 2 + 6, TILE_SIZE * 2)
-        
+
         -- top
         love.graphics.rectangle('fill', MAP_RENDER_OFFSET_X + (MAP_WIDTH / 2) * TILE_SIZE - TILE_SIZE,
             -TILE_SIZE - 6, TILE_SIZE * 2, TILE_SIZE * 2 + 12)
-        
+
         --bottom
         love.graphics.rectangle('fill', MAP_RENDER_OFFSET_X + (MAP_WIDTH / 2) * TILE_SIZE - TILE_SIZE,
             VIRTUAL_HEIGHT - TILE_SIZE - 6, TILE_SIZE * 2, TILE_SIZE * 2 + 12)
     end, 'replace', 1)
 
     love.graphics.setStencilTest('less', 1)
-    
+
     if self.player then
         self.player:render()
     end
@@ -243,7 +262,7 @@ function Room:render()
     --
 
     -- love.graphics.setColor(255, 0, 0, 100)
-    
+
     -- -- left
     -- love.graphics.rectangle('fill', -TILE_SIZE - 6, MAP_RENDER_OFFSET_Y + (MAP_HEIGHT / 2) * TILE_SIZE - TILE_SIZE,
     -- TILE_SIZE * 2 + 6, TILE_SIZE * 2)
@@ -259,6 +278,6 @@ function Room:render()
     -- --bottom
     -- love.graphics.rectangle('fill', MAP_RENDER_OFFSET_X + (MAP_WIDTH / 2) * TILE_SIZE - TILE_SIZE,
     --     VIRTUAL_HEIGHT - TILE_SIZE - 6, TILE_SIZE * 2, TILE_SIZE * 2 + 12)
-    
+
     -- love.graphics.setColor(255, 255, 255, 255)
 end

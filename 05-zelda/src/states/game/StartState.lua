@@ -19,7 +19,7 @@ function StartState:update(dt)
 end
 
 function StartState:render()
-    love.graphics.draw(gTextures['background'], 0, 0, 0, 
+    love.graphics.draw(gTextures['background'], 0, 0, 0,
         VIRTUAL_WIDTH / gTextures['background']:getWidth(),
         VIRTUAL_HEIGHT / gTextures['background']:getHeight())
 

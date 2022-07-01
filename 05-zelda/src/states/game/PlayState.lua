@@ -66,7 +66,7 @@ function PlayState:render()
 
         love.graphics.draw(gTextures['hearts'], gFrames['hearts'][heartFrame],
             (i - 1) * (TILE_SIZE + 1), 2)
-        
+
         healthLeft = healthLeft - 2
     end
 end
