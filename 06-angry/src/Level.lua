@@ -132,7 +132,7 @@ function Level:init()
 end
 
 function Level:update(dt)
-    
+
     -- update launch marker, which shows trajectory
     self.launchMarker:update(dt)
 
@@ -141,7 +141,7 @@ function Level:update(dt)
 
     -- destroy all bodies we calculated to destroy during the update call
     for k, body in pairs(self.destroyedBodies) do
-        if not body:isDestroyed() then 
+        if not body:isDestroyed() then
             body:destroy()
         end
     end
@@ -172,24 +172,25 @@ function Level:update(dt)
 
     -- replace launch marker if original alien stopped moving
     if self.launchMarker.launched then
-        local xPos, yPos = self.launchMarker.alien.body:getPosition()
-        local xVel, yVel = self.launchMarker.alien.body:getLinearVelocity()
-        
-        -- if we fired our alien to the left or it's almost done rolling, respawn
-        if xPos < 0 or (math.abs(xVel) + math.abs(yVel) < 1.5) then
-            self.launchMarker.alien.body:destroy()
-            self.launchMarker = AlienLaunchMarker(self.world)
+        for _, alien in pairs(self.launchMarker.aliens) do
+            local xPos, yPos = alien.body:getPosition()
+            local xVel, yVel = alien.body:getLinearVelocity()
 
-            -- re-initialize level if we have no more aliens
-            if #self.aliens == 0 then
-                gStateMachine:change('start')
+            -- if we fired our alien to the left or it's almost done rolling, respawn
+            if xPos < 0 or (math.abs(xVel) + math.abs(yVel) < 1.5) then
+                alien.body:destroy()
+                self.launchMarker = AlienLaunchMarker(self.world)
             end
+        end
+
+        -- re-initialize level if we have no more aliens
+        if #self.aliens == 0 then
+            gStateMachine:change('start')
         end
     end
 end
 
 function Level:render()
-    
     -- render ground tiles across full scrollable width of the screen
     for x = -VIRTUAL_WIDTH, VIRTUAL_WIDTH * 2, 35 do
         love.graphics.draw(gTextures['tiles'], gFrames['tiles'][12], x, VIRTUAL_HEIGHT - 35)
@@ -197,11 +198,11 @@ function Level:render()
 
     self.launchMarker:render()
 
-    for k, alien in pairs(self.aliens) do
+    for _, alien in pairs(self.aliens) do
         alien:render()
     end
 
-    for k, obstacle in pairs(self.obstacles) do
+    for _, obstacle in pairs(self.obstacles) do
         obstacle:render()
     end
 
