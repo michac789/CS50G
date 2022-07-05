@@ -27,6 +27,7 @@ function Level:init()
 
         -- if we collided between both the player and an obstacle...
         if types['Obstacle'] and types['Player'] then
+            self.launchMarker.collided = true
 
             -- grab the body that belongs to the player
             local playerFixture = a:getUserData() == 'Player' and a or b
@@ -43,6 +44,7 @@ function Level:init()
 
         -- if we collided between an obstacle and an alien, as by debris falling...
         if types['Obstacle'] and types['Alien'] then
+            self.launchMarker.collided = true
 
             -- grab the body that belongs to the player
             local obstacleFixture = a:getUserData() == 'Obstacle' and a or b
@@ -59,6 +61,7 @@ function Level:init()
 
         -- if we collided between the player and the alien...
         if types['Player'] and types['Alien'] then
+            self.launchMarker.collided = true
 
             -- grab the bodies that belong to the player and alien
             local playerFixture = a:getUserData() == 'Player' and a or b
@@ -75,6 +78,7 @@ function Level:init()
 
         -- if we hit the ground, play a bounce sound
         if types['Player'] and types['Ground'] then
+            self.launchMarker.collided = true
             gSounds['bounce']:stop()
             gSounds['bounce']:play()
         end

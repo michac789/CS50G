@@ -10,6 +10,7 @@ AlienLaunchMarker = Class{}
 
 function AlienLaunchMarker:init(world)
     self.world = world
+    self.collided = false
 
     -- starting coordinates for launcher used to calculate launch vector
     self.baseX = 90
@@ -66,22 +67,24 @@ function AlienLaunchMarker:update(dt)
             self.shiftedY = math.min(self.baseY + 30, math.max(y, self.baseY - 30))
         end
 
-    elseif love.keyboard.wasPressed('space') then --TODO
-        -- get the coordinate of the base alien
-        local xcor = self.aliens[1].body:getX()
-        local ycor = self.aliens[1].body:getY()
-        local vx, vy = self.aliens[1].body:getLinearVelocity()
-        gSounds['kill']:play()
+    elseif love.keyboard.wasPressed('space') then
+        if self.collided == false then
+            -- get the coordinate of the base alien
+            local xcor = self.aliens[1].body:getX()
+            local ycor = self.aliens[1].body:getY()
+            local vx, vy = self.aliens[1].body:getLinearVelocity()
+            gSounds['kill']:play()
 
-        -- clone 2 more new aliens with same attribute as initial alien
-        -- alter its angle by a bit (one slightly above, one slightly below)
-        for i = -1, 1, 2 do
-            local newalien = Alien(self.world, 'round', xcor, ycor + 30 * i, 'Player')
-            newalien.body:setLinearVelocity(vx, vy + 20 * i)
-            newalien.fixture:setRestitution(0.4)
-            newalien.body:setAngularDamping(1)
+            -- clone 2 more new aliens with same attribute as initial alien
+            -- alter its angle by a bit (one slightly above, one slightly below)
+            for i = -1, 1, 2 do
+                local newalien = Alien(self.world, 'round', xcor, ycor + 30 * i, 'Player')
+                newalien.body:setLinearVelocity(vx + 10 * i, vy + 40 * i)
+                newalien.fixture:setRestitution(0.4)
+                newalien.body:setAngularDamping(1)
 
-            table.insert(self.aliens, newalien)
+                table.insert(self.aliens, newalien)
+            end
         end
     end
 end
@@ -90,7 +93,7 @@ function AlienLaunchMarker:render()
     if not self.launched then
 
         -- render base alien, non physics based
-        love.graphics.draw(gTextures['aliens'], gFrames['aliens'][9], 
+        love.graphics.draw(gTextures['aliens'], gFrames['aliens'][9],
             self.shiftedX - 17.5, self.shiftedY - 17.5)
 
         if self.aiming then
