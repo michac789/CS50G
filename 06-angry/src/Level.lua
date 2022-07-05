@@ -176,21 +176,36 @@ function Level:update(dt)
 
     -- replace launch marker if original alien stopped moving
     if self.launchMarker.launched then
+        local count = 0
         for _, alien in pairs(self.launchMarker.aliens) do
-            local xPos, yPos = alien.body:getPosition()
-            local xVel, yVel = alien.body:getLinearVelocity()
-
-            -- if we fired our alien to the left or it's almost done rolling, respawn
-            if xPos < 0 or (math.abs(xVel) + math.abs(yVel) < 1.5) then
-                alien.body:destroy()
-                self.launchMarker = AlienLaunchMarker(self.world)
+            if Level:aliendone(alien) then
+                count = count + 1
             end
+        end
+
+        -- only restart game if all aliens stop moving and not just one
+        if count == #self.launchMarker.aliens then
+            self.launchMarker = AlienLaunchMarker(self.world)
         end
 
         -- re-initialize level if we have no more aliens
         if #self.aliens == 0 then
             gStateMachine:change('start')
         end
+    end
+end
+
+-- helper function that helps to check if a single alien is not rolling anymore or go out of screen
+function Level:aliendone(alien)
+    local xPos, yPos = alien.body:getPosition()
+    local xVel, yVel = alien.body:getLinearVelocity()
+
+    -- if we fired our alien to the left or it's almost done rolling, respawn
+    if xPos < 0 or (math.abs(xVel) + math.abs(yVel) < 1.5) then
+        --alien.body:destroy()
+        return true
+    else
+        return false
     end
 end
 
