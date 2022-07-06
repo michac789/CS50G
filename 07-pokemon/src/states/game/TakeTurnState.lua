@@ -212,12 +212,17 @@ function TakeTurnState:victory()
 
                         -- set our exp to whatever the overlap is
                         self.playerPokemon.currentExp = self.playerPokemon.currentExp - self.playerPokemon.expToLevel
-                        self.playerPokemon:levelUp()
+                        local HPIncrease, attackIncrease, defenseIncrease, speedIncrease = self.playerPokemon:levelUp()
 
                         gStateStack:push(BattleMessageState('Congratulations! Level Up!',
                         function()
                             self:fadeOutWhite()
                         end))
+
+                        gStateStack:push(LevelUpState(
+                            self.battleState.player.party.pokemon[1],
+                            HPIncrease, attackIncrease, defenseIncrease, speedIncrease
+                        ))
                     else
                         self:fadeOutWhite()
                     end
@@ -231,13 +236,13 @@ function TakeTurnState:fadeOutWhite()
     -- fade in
     gStateStack:push(FadeInState({
         r = 1, g = 1, b = 1
-    }, 1, 
+    }, 1,
     function()
 
         -- resume field music
         gSounds['victory-music']:stop()
         gSounds['field-music']:play()
-        
+
         -- pop off the battle state
         gStateStack:pop()
         gStateStack:push(FadeOutState({

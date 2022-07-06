@@ -69,7 +69,7 @@ end
 
 function Textbox:render()
     self.panel:render()
-    
+
     love.graphics.setFont(self.font)
     for i = 1, #self.displayingChunks do
         love.graphics.print(self.displayingChunks[i], self.x + 3, self.y + 3 + (i - 1) * 16)
