@@ -59,7 +59,7 @@ function PlayState:update(dt)
             -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
             -- no higher than 10 pixels below the top edge of the screen,
             -- and no lower than a gap length (90 pixels) from the bottom
-            local y = math.max(-PIPE_HEIGHT + 10, 
+            local y = math.max(-PIPE_HEIGHT + 10,
                 math.min(self.lastY + math.random(-20, 20), VIRTUAL_HEIGHT - 90 - PIPE_HEIGHT))
             self.lastY = y
     
@@ -113,8 +113,8 @@ function PlayState:update(dt)
         -- update bird based on gravity and input
         self.bird:update(dt)
     
-        -- reset if we get to the ground
-        if self.bird.y > VIRTUAL_HEIGHT - 15 then
+        -- reset if we get to the ground, bug fix prevent bird from going above ceiling
+        if self.bird.y > VIRTUAL_HEIGHT - 15 or self.bird.y < 0 then
             sounds['explosion']:play()
             sounds['hurt']:play()
     
