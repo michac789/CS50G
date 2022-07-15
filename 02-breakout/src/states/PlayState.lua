@@ -235,14 +235,23 @@ function PlayState:update(dt)
         end
     end
 
-    -- add paddle length every multiples of 3000 score
-    if self.score >= math.ceil((self.scoretracker + 1) / 3000) * 3000 then
+    -- add paddle length every multiples of 3000 score (only if at level 5 or below)
+    if self.score >= math.ceil((self.scoretracker + 1) / 3000) * 3000 and self.level <= 5 then
         if self.paddle.size < 4 then
             self.paddle.size = self.paddle.size + 1
             self.paddle.width = self.paddle.width + 32
             gSounds['longerpaddle']:play()
         end
         self.scoretracker = self.score
+    end
+
+    -- decrease the length of paddle for higher difficulty
+    if 5 < self.level and self.level <= 7 then
+        self.paddle.size = 3
+    elseif 7 < self.level and self.level <= 9 then
+        self.paddle.size = 2
+    elseif self.level >= 10 then
+        self.paddle.size = 1
     end
 
     -- if ball goes below bounds, revert to serve state and decrease health
