@@ -36,7 +36,7 @@ function PlayState:enter(params)
     })
     self.player.score = self.score
 
-    self:spawnEnemies()
+    self:spawnEnemies(params.levelwidth)
     self.player:changeState('falling')
 end
 
@@ -108,7 +108,7 @@ end
 --[[
     Adds a series of enemies to the level randomly.
 ]]
-function PlayState:spawnEnemies()
+function PlayState:spawnEnemies(levelwidth)
     -- spawn snails in the level
     for x = 1, self.tileMap.width do
 
@@ -120,8 +120,10 @@ function PlayState:spawnEnemies()
                 if self.tileMap.tiles[y][x].id == TILE_ID_GROUND then
                     groundFound = true
 
-                    -- random chance, 1 in 20
-                    if math.random(20) == 1 then
+                    -- random chance, 1 in 20 (initially)
+                    -- increase chance of enemy spawning for higher levels
+                    local chance = math.max(20 - math.floor(levelwidth / 20), 2)
+                    if math.random(chance) == 1 then
 
                         -- instantiate snail, declaring in advance so we can pass it into state machine
                         local snail

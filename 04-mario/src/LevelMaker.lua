@@ -10,10 +10,11 @@
 
 LevelMaker = Class{}
 
-function LevelMaker.generate(width, height)
+function LevelMaker.generate(width, height, levelcount)
     local tiles = {}
     local entities = {}
     local objects = {}
+    local lvcount = levelcount
 
     -- whether we should draw our tiles with toppers
     local topper = true
@@ -49,7 +50,7 @@ function LevelMaker.generate(width, height)
                         gSounds['pickup']:play()
                         gStateMachine:change('play', {
                             levelwidth = width + 20,
-                            score = player.score,
+                            score = player.score + width * 5,
                         })
                     end
                 })
@@ -193,7 +194,7 @@ function LevelMaker.generate(width, height)
                             if not obj.hit then
 
                                 -- chance to spawn gem, not guaranteed
-                                if math.random(3) == 1 then
+                                if math.random(2) == 1 then
 
                                     -- maintain reference so we can set it to nil
                                     local gem = GameObject {
