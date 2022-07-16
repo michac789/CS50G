@@ -248,10 +248,13 @@ function PlayState:update(dt)
     -- decrease the length of paddle for higher difficulty
     if 5 < self.level and self.level <= 7 then
         self.paddle.size = 3
+        self.paddle.width = 96
     elseif 7 < self.level and self.level <= 9 then
         self.paddle.size = 2
+        self.paddle.width = 64
     elseif self.level >= 10 then
         self.paddle.size = 1
+        self.paddle.width = 32
     end
 
     -- if ball goes below bounds, revert to serve state and decrease health
